@@ -8,9 +8,13 @@ import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.buffer.MemoryDataLoader;
 import org.encog.ml.data.buffer.codec.CSVDataCODEC;
 import org.encog.ml.data.buffer.codec.DataSetCODEC;
+import org.encog.ml.data.folded.FoldedDataSet;
+import org.encog.ml.train.MLTrain;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
+import org.encog.neural.networks.training.cross.CrossValidationKFold;
 import org.encog.neural.networks.training.propagation.back.Backpropagation;
+import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 import org.encog.util.csv.CSVFormat;
 
 public class NeuralNetwork {
@@ -60,6 +64,10 @@ public class NeuralNetwork {
 		MemoryDataLoader mdl = new MemoryDataLoader(dsc);
 		MLDataSet trainingSet = mdl.external2Memory();
 
+		FoldedDataSet folded = new FoldedDataSet(trainingSet);
+		MLTrain train = new ResilientPropagation(network, folded);
+		CrossValidationKFold cv = new CrossValidationKFold(train, 5);
+
 		//Use backpropagation training with alpha=0.1 and momentum=0.2
 		Backpropagation trainer = new Backpropagation(network, trainingSet, 0.1, 0.2);
 
@@ -69,9 +77,10 @@ public class NeuralNetwork {
 		System.out.println("[INFO] Training...");
 
 		do {
-			trainer.iteration(); 
+			cv.iteration();
 			epoch++;
-		} while(trainer.getError() > minError);
+		} while(cv.getError() > minError);
+		Utilities.saveNeuralNetwork(network, "./test.nn");
 		trainer.finishTraining();
 		System.out.println("[INFO] Training complete in " + epoch + " epochs with e= " + trainer.getError());
 
