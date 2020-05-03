@@ -48,7 +48,7 @@ public class NeuralNetwork {
 	 * or reading from the CSV file. 
 	 */
 	public NeuralNetwork() {
-		int inputs = 16; //Change this to the number of input neurons //100
+		int inputs = 100; //Change this to the number of input neurons //100
 		int outputs =  235; //Change this to the number of output neurons //235
 		int hiddenLayerNodes = 1;
 		

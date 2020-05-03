@@ -9,7 +9,7 @@ public class VectorProcessor {
     private File csvOutputFile = new File("data.csv");
     private int kmerSize;
     private int vectorSize = 20;
-    private double [] vector = new double[vectorSize];
+    private double [] vector = new double[20];
     private double [] langInd = new double[235];
     private DecimalFormat df = new DecimalFormat("###.###");
     private Language lang;
@@ -41,11 +41,8 @@ public class VectorProcessor {
         Language[] langs = Language.values();
 
         for (int i = 0; i < vector.length - kmerSize; i++) {
-            //vector[i] = 0;
             String kmer = text.substring(i, i + kmerSize);
             vector[i] = kmer.hashCode();
-//            i = kmer.hashCode() % vector.length;
-//            vector[i]++;
         }
         vector = Utilities.normalize(vector, -1, 1);
 
@@ -59,7 +56,8 @@ public class VectorProcessor {
             if(lang.equalsIgnoreCase(String.valueOf(langs[i]))){
                 langInd[i] = 1;
             }
-            bw.write(langInd[i]  + ",");
+            bw.write(langInd[i]  + ", ");
+            langInd[i] = 0;
         }
         bw.newLine();
         bw.close();
