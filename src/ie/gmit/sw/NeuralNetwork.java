@@ -4,6 +4,8 @@ import java.io.File;
 
 import org.encog.Encog;
 import org.encog.engine.network.activation.ActivationSigmoid;
+import org.encog.ml.data.MLData;
+import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.buffer.MemoryDataLoader;
 import org.encog.ml.data.buffer.codec.CSVDataCODEC;
@@ -46,8 +48,8 @@ public class NeuralNetwork {
 	 * or reading from the CSV file. 
 	 */
 	public NeuralNetwork() {
-		int inputs = 2; //Change this to the number of input neurons
-		int outputs =  235; //Change this to the number of output neurons
+		int inputs = 16; //Change this to the number of input neurons //100
+		int outputs =  235; //Change this to the number of output neurons //235
 		int hiddenLayerNodes = 1;
 		
 		//Configure the neural network topology.
@@ -85,13 +87,18 @@ public class NeuralNetwork {
 		System.out.println("[INFO] Training complete in " + epoch + " epochs with e= " + trainer.getError());
 
 		//Test the NN
-//		for(MLDataPair pair: trainingSet ) {
-//			MLData output = network.compute(pair.getInput());
-//			System.out.println(pair.getInput().getData(0) + ","
-//					+ pair.getInput().getData(1)
-//					+ ", Y=" + (int)Math.round(output.getData(0)) //Round the result
-//					+ ", Yd=" + (int) pair.getIdeal().getData(0));
-//		}
+		for(MLDataPair pair: trainingSet ) {
+			MLData output = network.compute(pair.getInput());
+			System.out.println(pair.getInput().getData(0) + ","
+					+ pair.getInput().getData(1)
+					+ ", Y=" + (int)Math.round(output.getData(0)) //Round the result
+					+ ", Yd=" + (int) pair.getIdeal().getData(0));
+		}
 		Encog.getInstance().shutdown();
+	}
+
+	public static void main(String[] args) {
+		NeuralNetwork neuralNetwork = new NeuralNetwork();
+
 	}
 }

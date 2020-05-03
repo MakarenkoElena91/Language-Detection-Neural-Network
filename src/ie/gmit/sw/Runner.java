@@ -7,11 +7,11 @@ public class Runner {
 			map the output of the neural network and the training data label to / from the language using the
 			following. Eg. index 0 maps to Achinese, i.e. langs[0].  
 		*/
-//		Language[] langs = Language.values(); //Only call this once...
-////		for (int i = 0; i < langs.length; i++){
-////			System.out.println(i + "-->" + langs[i]);
-////		}
-		Menu menu = new Menu();
-        menu.menu();
+		Language[] langs = Language.values(); //Only call this once...
+		for (int i = 0; i < langs.length; i++){
+			System.out.println(i + "-->" + langs[i]);
+		}
+//		Menu menu = new Menu();
+//        menu.menu();
     }
 }
