@@ -246,4 +246,11 @@ public enum Language {
     public CharSequence getLanguageName() {
         return this.language;
     }
+
+    public double[] toVector(){
+    	var setIndex = ordinal();
+    	var vector = new double[Language.values().length];
+    	// ToDo: code here
+    	return vector;
+	}
 }
