@@ -1,4 +1,3 @@
-
 package ie.gmit.sw;
 
 import java.io.*;
@@ -6,7 +5,7 @@ import java.text.DecimalFormat;
 import java.io.FileWriter;
 import java.text.NumberFormat;
 import java.util.Locale;
-import java.util.StringJoiner;
+
 
 public class VectorProcessor {
     private File file = new File("wili-2018-Small-11750-Edited.txt");
@@ -44,9 +43,9 @@ public class VectorProcessor {
     }
 
     public void process(String line) throws Exception {
-        int languagSeparator = line.lastIndexOf('@');
-        Language lang = Language.valueOf(line.substring(languagSeparator + 1).trim());
-        String text = line.substring(0, languagSeparator).toLowerCase();
+        int languageSeparator = line.lastIndexOf('@');
+        Language lang = Language.valueOf(line.substring(languageSeparator + 1).trim());
+        String text = line.substring(0, languageSeparator);
 
         if (text.length() < 10) return;
 

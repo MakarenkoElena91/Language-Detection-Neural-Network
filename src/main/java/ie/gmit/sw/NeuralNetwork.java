@@ -3,12 +3,11 @@ package ie.gmit.sw;
 import java.io.File;
 import org.encog.Encog;
 import org.encog.engine.network.activation.ActivationReLU;
-import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.engine.network.activation.ActivationSoftMax;
-import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
+import org.encog.ml.data.basic.BasicMLData;
 import org.encog.ml.data.buffer.MemoryDataLoader;
 import org.encog.ml.data.buffer.codec.CSVDataCODEC;
 import org.encog.ml.data.buffer.codec.DataSetCODEC;
@@ -18,9 +17,7 @@ import org.encog.ml.train.strategy.RequiredImprovementStrategy;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.cross.CrossValidationKFold;
-import org.encog.neural.networks.training.propagation.back.Backpropagation;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
-import org.encog.util.arrayutil.TemporalWindowArray;
 import org.encog.util.csv.CSVFormat;
 import org.encog.util.simple.EncogUtility;
 
@@ -30,8 +27,6 @@ public class NeuralNetwork {
     int hiddenLayerNodes = inputs/4;
     final double MAX_ERROR = 0.0017;
 
-    public NeuralNetwork() {}
-
     public MLDataSet generateTraining() {
         DataSetCODEC dsc = new CSVDataCODEC(new File("data.csv"), CSVFormat.DECIMAL_POINT,
                 false, inputs, outputs, false);
@@ -39,7 +34,6 @@ public class NeuralNetwork {
         MLDataSet trainingSet = mdl.external2Memory();
         return  trainingSet;
     }
-
     public BasicNetwork createNetwork() {
         BasicNetwork network = new BasicNetwork();
         network.addLayer(new BasicLayer(null, true, inputs));
@@ -49,14 +43,20 @@ public class NeuralNetwork {
         network.reset();
         return network;
     }
-
     public void train(BasicNetwork network, MLDataSet trainingSet) {
 //        FoldedDataSet folded = new FoldedDataSet(trainingSet);
 //        MLTrain train = new ResilientPropagation(network, folded);
 //        CrossValidationKFold trainFolded = new CrossValidationKFold(train, 5);
         ResilientPropagation trainFolded = new ResilientPropagation(network, trainingSet);
         trainFolded.addStrategy(new RequiredImprovementStrategy(5));
-        EncogUtility.trainToError(trainFolded, MAX_ERROR);
+        //EncogUtility.trainToError(trainFolded, MAX_ERROR);
+        int epoch = 1;
+
+        do {
+            trainFolded.iteration();
+            System.out.println("Epoch #" + epoch + " Error:" + trainFolded.getError());
+            epoch++;
+        } while (trainFolded.getError() > MAX_ERROR && epoch<25);
 
         Utilities.saveNeuralNetwork(network, "./test.nn");
         trainFolded.finishTraining();
@@ -66,6 +66,20 @@ public class NeuralNetwork {
         double err = loadedNetwork.calculateError(trainingSet);
         System.out.println("Loaded network’s error is (should be same as above) : "+err);
         EncogUtility.evaluate(loadedNetwork, trainingSet);
+    }
+    public void test(BasicNetwork network, double[] vector) throws Exception {
+        var mlData = new BasicMLData(vector);
+        MLData output = network.compute(mlData);
+        double results[] = output.getData();
+        int resultIndex = -1;
+        for (int i = 0; i < results.length; i++) {
+            if (results[i] > 0 && (resultIndex == -1 || results[i] > results[resultIndex])) {
+                resultIndex = i;
+            }
+        }
+        Language[] langs = Language.values();
+        System.out.println("Language is... " + langs[resultIndex]);
+        System.out.println();
     }
     public void predict(BasicNetwork network, MLDataSet trainingSet) {
         double correct = 0;
@@ -77,9 +91,8 @@ public class NeuralNetwork {
         for (MLDataPair pair : trainingSet) {
             total++;
             MLData output = network.compute(pair.getInput());
-            MLData actual = output;
             MLData ideal = pair.getIdeal();
-            double results[] = actual.getData();
+            double results[] = output.getData();
 
 
             for (int i = 0; i < results.length; i++) {
@@ -114,14 +127,5 @@ public class NeuralNetwork {
         MLDataSet training = generateTraining();
         train(network, training);
         predict(network, training);
-    }
-
-    public static void main(String[] args) {
-        NeuralNetwork neuralNetwork = new NeuralNetwork();
-        for(int i = 0; i < 3;i++){
-            neuralNetwork.run();
-        }
-
-        Encog.getInstance().shutdown();
     }
 }
